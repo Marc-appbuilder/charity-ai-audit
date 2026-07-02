@@ -45,7 +45,7 @@ export default async function handler(req, res) {
 
     ${summary ? `<p style="font-size:12px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">AI summary</p><div class="summary">${summary}</div>` : ''}
 
-    <div class="footer">Sent by Glade Tech Charity AI Audit</div>
+    <div class="footer">Sent by Fabric Tech Charity AI Audit</div>
   </div>
 </div>
 </body></html>`;
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
       'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: 'Glade Tech <leads@vaughanai.co>',
+      from: 'Fabric Tech <leads@vaughanai.co>',
       to: process.env.NOTIFICATION_EMAIL,
       replyTo: email,
       subject: `New charity audit — ${organisation || name}`,

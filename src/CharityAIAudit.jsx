@@ -232,7 +232,7 @@ export default function CharityAIAudit() {
         <header className="mb-8">
           <div className="flex items-center justify-between mb-3">
             <span style={{ ...fontMono, color: colors.teal, letterSpacing: "0.08em" }} className="text-xs uppercase">
-              Glade Tech
+              Fabric Tech
             </span>
             {!onResultsStep && (
               <span style={{ ...fontMono, color: colors.muted }} className="text-xs">
