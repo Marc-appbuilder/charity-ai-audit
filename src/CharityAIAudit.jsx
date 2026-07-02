@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Clock, ArrowRight, ArrowLeft, Sparkles, Loader2, RotateCcw } from "lucide-react";
+import { Clock, ArrowRight, ArrowLeft, Sparkles, Loader2, RotateCcw, Send } from "lucide-react";
 
 const FONT_LINK_ID = "caa-fonts";
 
@@ -67,6 +67,10 @@ export default function CharityAIAudit() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [contact, setContact] = useState({ name: "", organisation: "", email: "" });
+  const [contactSending, setContactSending] = useState(false);
+  const [contactSent, setContactSent] = useState(false);
+  const [contactError, setContactError] = useState("");
   const [displayedTotal, setDisplayedTotal] = useState(0);
   const rafRef = useRef(null);
 
@@ -182,6 +186,30 @@ export default function CharityAIAudit() {
     } finally {
       setLoading(false);
       setStep(CATEGORIES.length);
+    }
+  }
+
+  async function submitContact(e) {
+    e.preventDefault();
+    if (!contact.name || !contact.email) return;
+    setContactSending(true);
+    setContactError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...contact,
+          summary: result?.summary || "",
+          items: result?.items || [],
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setContactSent(true);
+    } catch {
+      setContactError("Something went wrong — please email us directly.");
+    } finally {
+      setContactSending(false);
     }
   }
 
@@ -429,6 +457,77 @@ export default function CharityAIAudit() {
                       </div>
                     );
                   })}
+                </div>
+
+                {/* CTA */}
+                <div
+                  style={{ background: colors.surfaceAlt, border: `1px solid ${colors.brass}` }}
+                  className="rounded-xl p-6 mt-2"
+                >
+                  {contactSent ? (
+                    <div className="text-center py-2">
+                      <p style={{ ...fontDisplay, color: colors.ink }} className="text-base mb-1">
+                        Thanks — we'll be in touch shortly.
+                      </p>
+                      <p style={{ color: colors.muted }} className="text-xs">
+                        We'll put together a practical plan based on your audit.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <span style={{ ...fontMono, color: colors.brass }} className="text-xs uppercase tracking-wide">
+                        Want us to build this for you?
+                      </span>
+                      <p style={{ ...fontDisplay }} className="text-lg mt-1 mb-4 leading-snug">
+                        Get a free automation roadmap for your charity.
+                      </p>
+                      <p style={{ color: colors.muted }} className="text-sm mb-5">
+                        Leave your details and we'll put together a concrete plan — what to build, what it costs, and what it saves.
+                      </p>
+                      <form onSubmit={submitContact} className="space-y-3">
+                        <input
+                          type="text"
+                          required
+                          placeholder="Your name"
+                          value={contact.name}
+                          onChange={e => setContact(p => ({ ...p, name: e.target.value }))}
+                          style={{ background: colors.surface, border: `1px solid ${colors.border}`, color: colors.ink }}
+                          className="w-full rounded-lg px-3 py-2.5 text-sm outline-none placeholder:opacity-40"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Organisation name"
+                          value={contact.organisation}
+                          onChange={e => setContact(p => ({ ...p, organisation: e.target.value }))}
+                          style={{ background: colors.surface, border: `1px solid ${colors.border}`, color: colors.ink }}
+                          className="w-full rounded-lg px-3 py-2.5 text-sm outline-none placeholder:opacity-40"
+                        />
+                        <input
+                          type="email"
+                          required
+                          placeholder="Email address"
+                          value={contact.email}
+                          onChange={e => setContact(p => ({ ...p, email: e.target.value }))}
+                          style={{ background: colors.surface, border: `1px solid ${colors.border}`, color: colors.ink }}
+                          className="w-full rounded-lg px-3 py-2.5 text-sm outline-none placeholder:opacity-40"
+                        />
+                        {contactError && (
+                          <p style={{ color: colors.clay }} className="text-xs">{contactError}</p>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={contactSending}
+                          style={{ background: colors.brass, color: colors.bg }}
+                          className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg disabled:opacity-60"
+                        >
+                          {contactSending
+                            ? <><Loader2 size={14} className="animate-spin" /> Sending…</>
+                            : <><Send size={14} /> Get my free roadmap</>
+                          }
+                        </button>
+                      </form>
+                    </>
+                  )}
                 </div>
 
                 <button
